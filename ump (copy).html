@@ -1,0 +1,96 @@
+<head>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+<script type="text/javascript" src="js/ump.js"></script>
+<script type="text/javascript">
+var urls = {
+	"reddit": ["http://reddit.com/r/listentothis.json?jsonp=?", "http://reddit.com/r/music.json?jsonp=?"]
+};
+UMP(urls, function(data, handle){
+	$.each(data, function(k, v) {
+		$item = $("<div>", v.options).click(function(){
+			v.handler.embed(v, function(handle){
+				handle.play();
+			});
+			$(this).addClass("active").siblings().removeClass("active");
+		});
+		$(".container").append($item);
+	});
+	handle.buffering = function(x){
+		$("#seek #loaded").width($("#seek").width()*x);
+	};
+	handle.playing = function(x){
+		$("#seek #played").width($("#seek").width()*x);
+	};
+	$("button#play").click(function(){
+		handle.play();
+	});
+	$("button#pause").click(function(){
+		handle.pause();
+	});
+	$("#prev").click(function(){
+		handle.prev(function(handle){
+			handle.handler.embed(handle, function(handle){
+				handle.play();
+			});
+			$("[data-url="+handle.options["data-url"]+"]").addClass("active").siblings().removeClass("active");
+		});
+	});
+	$("#next").click(function(){
+		handle.next(function(handle){
+			handle.handler.embed(handle, function(handle){
+				handle.play();
+			});
+			console.log(handle.options["data-url"]);
+			$("[data-url="+handle.options["data-url"]+"]").addClass("active").siblings().removeClass("active");
+		});
+	});
+	$("#seek").click(function(e){
+		handle.seekToPercent(e.offsetX/$("#seek").width());
+	});
+	$("#shuffle").change(function(){
+		if( this.checked )
+			UMPClass.options.shuffle = true;
+		else
+			UMPClass.options.shuffle = false;
+	});
+});
+</script>
+<style type="text/css">
+#seek {
+	position: relative;
+	width: 500px;
+	height: 8px;
+	background: #EEE;
+}
+#seek #loaded {
+	background: #AAA;
+	position: absolute;
+	height: 8px;
+}
+#seek #played {
+	background: green;
+	position: absolute;
+	height: 8px;
+}
+.active {
+	border: 1px green solid;
+}
+</style>
+</head>
+<body>
+	<div id="controls">
+		<button id="play">Play</button>
+		<button id="pause">Pause</button>
+		<button id="prev">Previous</button>
+		<button id="next">Next</button>
+		<input type="checkbox" name="shuffle" name="shuffle" id="shuffle" /><label for="shuffle">Shuffle</label>
+		<div id="seek">
+			<div id="loaded"></div>
+			<div id="played"></div>
+		</div>
+	</div>
+	<div id="player"></div>
+	<div class="container"></div>
+</body>

@@ -1,0 +1,86 @@
+<head>
+<script type="text/javascript" src="js/jquery.js"></script>
+<!--<script type="text/javascript" src="http://documentcloud.github.com/underscore/underscore-min.js"></script>-->
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+<script type="text/javascript" src="js/ump.js"></script>
+<script type="text/javascript">
+var urls = {
+	"reddit": ["http://reddit.com/r/listentothis.json?jsonp=?&callback=?", "http://reddit.com/r/music.json?jsonp=?&callback=?"]
+};
+UMP(urls, function(data){
+	$.each(data, function(k, v) {
+		v.options.html = '<h4>'+v.options["data-title"]+'</h4>';
+		$item = $("<div>", v.options).click(function(){
+			v.play();
+			$(this).addClass("active").siblings().removeClass("active");
+				
+			$("button#play").click(function(){
+				v.play();
+			});
+			$("button#pause").click(function(){
+				v.pause();
+			});
+			$("button#prev").click(function(){
+				var p = v.prev();
+				$("[data-uid="+p.options["data-uid"]+"]").addClass("active").siblings().removeClass("active");
+			});
+			$("button#next").click(function(){
+				var n = v.next();
+				$("[data-uid="+n.options["data-uid"]+"]").addClass("active").siblings().removeClass("active");
+			});
+			$("#shuffle").change(function(){
+				if( this.checked )
+					v.shuffle();
+			});
+			$("#seek").click(function(e){
+				v.seekTo(e.offsetX/$(this).width()*v.getDuration());
+			});
+		});
+		
+		$("#container").append($item);
+	});
+});
+UMP.buffering = function(x){
+	$("#seek #loaded").width($("#seek").width()*x);
+};
+UMP.playing = function(x){
+	$("#seek #played").width($("#seek").width()*x);
+};
+</script>
+<style type="text/css">
+#seek {
+	position: relative;
+	width: 500px;
+	height: 8px;
+	background: #EEE;
+}
+#seek #loaded {
+	background: #AAA;
+	position: absolute;
+	height: 8px;
+}
+#seek #played {
+	background: green;
+	position: absolute;
+	height: 8px;
+}
+.active {
+	border: 1px green solid;
+}
+</style>
+</head>
+<body>
+	<div id="controls">
+		<button id="play">Play</button>
+		<button id="pause">Pause</button>
+		<button id="prev">Previous</button>
+		<button id="next">Next</button>
+		<input type="checkbox" name="shuffle" name="shuffle" id="shuffle" /><label for="shuffle">Shuffle</label>
+		<div id="seek">
+			<div id="loaded"></div>
+			<div id="played"></div>
+		</div>
+	</div>
+	<div id="player"></div>
+	<div id="container"></div>
+</body>
